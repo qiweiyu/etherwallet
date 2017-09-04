@@ -51,7 +51,6 @@ var viewWalletCtrl = function($scope, walletService) {
         $scope.wallet = null;
         walletService.wallet = null;
         walletService.password = '';
-        $scope.blob = $scope.blobEnc = $scope.password = "";
     }
 };
 module.exports = viewWalletCtrl;

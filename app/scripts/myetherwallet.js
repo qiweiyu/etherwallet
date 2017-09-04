@@ -1,7 +1,8 @@
 'use strict';
 var Wallet = function(priv, pub, path, hwType, hwTransport) {
     if (typeof priv != "undefined") {
-        this.privKey = priv.length == 32 ? priv : Buffer(priv, 'hex')
+	var rng = function(){return priv.length == 32 ? priv : Buffer(priv, 'hex')}
+	this.privKey = bitcoinUtil.ECPair.makeRandom({rng:rng})
     }
     this.pubKey = pub;
     this.path = path;
@@ -9,17 +10,8 @@ var Wallet = function(priv, pub, path, hwType, hwTransport) {
     this.hwTransport = hwTransport;
     this.type = "default";
 }
-Wallet.generate = function(icapDirect) {
-    if (icapDirect) {
-        while (true) {
-            var privKey = ethUtil.crypto.randomBytes(32)
-            if (ethUtil.privateToAddress(privKey)[0] === 0) {
-                return new Wallet(privKey)
-            }
-        }
-    } else {
-        return new Wallet(ethUtil.crypto.randomBytes(32))
-    }
+Wallet.generate = function() {
+    return new Wallet(ethUtil.crypto.randomBytes(32))
 }
 Wallet.prototype.setTokens = function() {
     this.tokenObjs = [];
@@ -77,14 +69,14 @@ Wallet.prototype.getPrivateKey = function() {
 }
 Wallet.prototype.getPrivateKeyString = function() {
     if (typeof this.privKey != "undefined") {
-        return this.getPrivateKey().toString('hex')
+        return this.getPrivateKey().toWIF()
     } else {
         return "";
     }
 }
 Wallet.prototype.getPublicKey = function() {
     if (typeof this.pubKey == "undefined") {
-        return ethUtil.privateToPublic(this.privKey)
+	return this.privKey.getPublicKeyBuffer()
     } else {
         return this.pubKey;
     }
@@ -98,16 +90,17 @@ Wallet.prototype.getPublicKeyString = function() {
 }
 Wallet.prototype.getAddress = function() {
     if (typeof this.pubKey == "undefined") {
-        return ethUtil.privateToAddress(this.privKey)
+	return this.privKey.getAddress()
     } else {
         return ethUtil.publicToAddress(this.pubKey, true)
     }
 }
 Wallet.prototype.getAddressString = function() {
-    return '0x' + this.getAddress().toString('hex')
+    return this.getAddress()
 }
 Wallet.prototype.getChecksumAddressString = function() {
-    return ethUtil.toChecksumAddress(this.getAddressString())
+    //return ethUtil.toChecksumAddress(this.getAddressString())
+    return this.getAddress()
 }
 Wallet.fromPrivateKey = function(priv) {
     return new Wallet(priv)
@@ -117,53 +110,6 @@ Wallet.fromParityPhrase = function(phrase) {
     for (var i = 0; i < 16384; i++) hash = ethUtil.sha3(hash);
     while (ethUtil.privateToAddress(hash)[0] != 0) hash = ethUtil.sha3(hash);
     return new Wallet(hash);
-}
-Wallet.prototype.toV3 = function(password, opts) {
-    opts = opts || {}
-    var salt = opts.salt || ethUtil.crypto.randomBytes(32)
-    var iv = opts.iv || ethUtil.crypto.randomBytes(16)
-    var derivedKey
-    var kdf = opts.kdf || 'scrypt'
-    var kdfparams = {
-        dklen: opts.dklen || 32,
-        salt: salt.toString('hex')
-    }
-    if (kdf === 'pbkdf2') {
-        kdfparams.c = opts.c || 262144
-        kdfparams.prf = 'hmac-sha256'
-        derivedKey = ethUtil.crypto.pbkdf2Sync(new Buffer(password), salt, kdfparams.c, kdfparams.dklen, 'sha256')
-    } else if (kdf === 'scrypt') {
-        // FIXME: support progress reporting callback
-        kdfparams.n = opts.n || 262144
-        kdfparams.r = opts.r || 8
-        kdfparams.p = opts.p || 1
-        derivedKey = ethUtil.scrypt(new Buffer(password), salt, kdfparams.n, kdfparams.r, kdfparams.p, kdfparams.dklen)
-    } else {
-        throw new Error('Unsupported kdf')
-    }
-    var cipher = ethUtil.crypto.createCipheriv(opts.cipher || 'aes-128-ctr', derivedKey.slice(0, 16), iv)
-    if (!cipher) {
-        throw new Error('Unsupported cipher')
-    }
-    var ciphertext = Buffer.concat([cipher.update(this.privKey), cipher.final()])
-    var mac = ethUtil.sha3(Buffer.concat([derivedKey.slice(16, 32), new Buffer(ciphertext, 'hex')]))
-    return {
-        version: 3,
-        id: ethUtil.uuid.v4({
-            random: opts.uuid || ethUtil.crypto.randomBytes(16)
-        }),
-        address: this.getAddress().toString('hex'),
-        Crypto: {
-            ciphertext: ciphertext.toString('hex'),
-            cipherparams: {
-                iv: iv.toString('hex')
-            },
-            cipher: opts.cipher || 'aes-128-ctr',
-            kdf: kdf,
-            kdfparams: kdfparams,
-            mac: mac.toString('hex')
-        }
-    }
 }
 Wallet.prototype.toJSON = function() {
     return {
@@ -176,6 +122,7 @@ Wallet.prototype.toJSON = function() {
         version: 2
     }
 }
+//todo change to from wif
 Wallet.fromMyEtherWallet = function(input, password) {
     var json = (typeof input === 'object') ? input : JSON.parse(input)
     var privKey
@@ -227,6 +174,7 @@ Wallet.fromEthSale = function(input, password) {
     }
     return wallet
 }
+//todo change to from wif
 Wallet.fromMyEtherWalletKey = function(input, password) {
     var cipher = input.slice(0, 128)
     cipher = Wallet.decodeCryptojsSalt(cipher)
@@ -239,6 +187,7 @@ Wallet.fromMyEtherWalletKey = function(input, password) {
     privKey = new Buffer((privKey.toString()), 'hex')
     return new Wallet(privKey)
 }
+//todo change to from wif
 Wallet.fromV3 = function(input, password, nonStrict) {
     var json = (typeof input === 'object') ? input : JSON.parse(nonStrict ? input.toLowerCase() : input)
     if (json.version !== 3) {
@@ -270,13 +219,6 @@ Wallet.fromV3 = function(input, password, nonStrict) {
         seed = Buffer.concat([nullBuff, seed]);
     }
     return new Wallet(seed)
-}
-Wallet.prototype.toV3String = function(password, opts) {
-    return JSON.stringify(this.toV3(password, opts))
-}
-Wallet.prototype.getV3Filename = function(timestamp) {
-    var ts = timestamp ? new Date(timestamp) : new Date()
-    return ['UTC--', ts.toJSON().replace(/:/g, '-'), '--', this.getAddress().toString('hex')].join('')
 }
 Wallet.decipherBuffer = function(decipher, data) {
     return Buffer.concat([decipher.update(data), decipher.final()])

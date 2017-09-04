@@ -1,21 +1,10 @@
 <main class="tab-pane block--container active" ng-if="globalService.currentTab==globalService.tabs.generateWallet.id" ng-controller='walletGenCtrl' role="main" ng-cloak>
 
-  <article class="block__wrap gen__1" ng-show="!wallet && !showGetAddress">
+  <article class="block__wrap gen__1" ng-show="!wallet">
 
     <section class="block__main gen__1--inner">
       <br />
       <h1 translate="NAV_GenerateWallet" aria-live="polite"> Create New Wallet</h1>
-      <h4 translate="GEN_Label_1"> Enter password </h4>
-      <div class="input-group">
-        <input name="password"
-             class="form-control"
-             type="{{showPass && 'password' || 'text'}}"
-             placeholder="{{'GEN_Placeholder_1' | translate }}"
-             ng-model="password"
-             ng-class="isStrongPass() ? 'is-valid' : 'is-invalid'"
-             aria-label="{{'GEN_Label_1' |translate}}"/>
-        <span tabindex="0" aria-label="make password visible" role="button" class="input-group-addon eye" ng-click="showPass=!showPass"></span>
-      </div>
       <a tabindex="0" role="button" class="btn btn-primary" func="generateSingleWallet" ng-click="genNewWallet()" translate="NAV_GenerateWallet">Generate Wallet</a>
       <p translate="x_PasswordDesc"> </p>
       <br>
@@ -60,61 +49,7 @@
 
   </article>
 
-
-  <article role="main" class="block__wrap gen__2" ng-show="wallet && !showPaperWallet" > <!-- -->
-
-    <section class="block__main gen__2--inner">
-      <br />
-      <h1 translate="GEN_Label_2">Save your Keystore File (UTC / JSON) </h1>
-
-      <a tabindex="0" role="button"
-         class="btn btn-primary"
-         href="{{blobEnc}}"
-         download="{{encFileName}}"
-         aria-label="{{'x_Download'|translate}} {{'x_Keystore'|translate}}"
-         aria-describedby="x_KeystoreDesc"
-         ng-click="downloaded()"
-         target="_blank" rel="noopener">
-        <span translate="x_Download"> DOWNLOAD </span> <span translate="x_Keystore2"> Keystore File (UTC / JSON) </span>
-      </a>
-
-      <div class="warn">
-        <p><strong>Do not lose it!</strong> It cannot be recovered if you lose it.</p>
-        <p><strong>Do not share it!</strong> Your funds will be stolen if you use this file on a malicious/phishing site.</p>
-        <p><strong>Make a backup!</strong> Secure it like the millions of dollars it may one day be worth.</p>
-      </div>
-
-      <p>
-        <a tabindex="0" role="button" class="btn btn-danger" ng-class="fileDownloaded ? '' : 'disabled' " ng-click="continueToPaper()" translate="GET_ConfButton">
-          I understand. Continue.
-        </a>
-      </p>
-
-    </section>
-
-    <section class="block__help">
-      <h2 translate="GEN_Help_8"> Not Downloading a File? </h2>
-      <ul>
-        <li translate="GEN_Help_9">  Try using Google Chrome </li>
-        <li translate="GEN_Help_10"> Right click &amp; save file as. Filename:</li>
-        <input value="{{encFileName}}" class="form-control input-sm" />
-      </ul>
-
-      <h2 translate="GEN_Help_11">Don't open this file on your computer</h2>
-      <ul><li translate="GEN_Help_12">Use it to unlock your wallet via MyEtherWallet (or Mist, Geth, Parity &amp; other wallet clients.)</li></ul>
-
-      <h2 translate="GEN_Help_4">Guides &amp; FAQ</h2>
-      <ul>
-        <li><a href="https://myetherwallet.groovehq.com/knowledge_base/topics/how-do-i-save-slash-backup-my-wallet" target="_blank" rel="noopener"><strong translate="GEN_Help_13">How to Back Up Your Keystore File</strong></a></li>
-        <li><a href="https://myetherwallet.groovehq.com/knowledge_base/topics/what-are-the-different-formats-of-a-private-key" target="_blank" rel="noopener"><strong translate="GEN_Help_14">What are these Different Formats?</a></strong></li>
-      </ul>
-
-    </section>
-
-  </article>
-
-
-  <article role="main" class="block__wrap gen__3" ng-show="showPaperWallet">
+  <article role="main" class="block__wrap gen__3" ng-show="wallet && showWallet">
 
     <section class="block__main gen__3--inner">
 
@@ -175,8 +110,9 @@
 
   </article>
 
-  <article class="text-left" ng-show="showGetAddress">
+  <article class="text-left" ng-show="wallet && showGetAddress">
     <div class="clearfix collapse-container">
+<!--
       <div ng-click="wd = !wd">
         <a class="collapse-button"><span ng-show="wd">+</span><span ng-show="!wd">-</span></a>
         <h1 traslate="GEN_Unlock">Unlock your wallet to see your address</h1>
@@ -187,6 +123,7 @@
           @@if (site === 'cx' )  {  <cx-wallet-decrypt-drtv></cx-wallet-decrypt-drtv>   }
       </div>
     </div>
+-->
 
     <div class="row" ng-show="wallet!=null" ng-controller='viewWalletCtrl'>
 
