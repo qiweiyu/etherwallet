@@ -1,8 +1,6 @@
 'use strict';
 var decryptWalletCtrl = function($scope, $sce, walletService) {
     $scope.walletType = "";
-    $scope.requireFPass = $scope.requirePPass = $scope.showFDecrypt = $scope.showPDecrypt = $scope.showAOnly = $scope.showParityDecrypt = false;
-    $scope.filePassword = "";
     $scope.fileContent = "";
     $scope.Validator = Validator;
     $scope.isSSL = window.location.protocol == 'https:';
@@ -143,8 +141,7 @@ var decryptWalletCtrl = function($scope, $sce, walletService) {
     $scope.onPrivKeyChange = function() {
         const manualprivkey = fixPkey($scope.manualprivkey);
 
-        $scope.requirePPass = manualprivkey.length == 128 || manualprivkey.length == 132;
-        $scope.showPDecrypt = manualprivkey.length == 64;
+        $scope.showPDecrypt = manualprivkey.length == 52;
     };
     $scope.onPrivKeyPassChange = function() {
         $scope.showPDecrypt = $scope.privPassword.length > 0;
@@ -202,25 +199,8 @@ var decryptWalletCtrl = function($scope, $sce, walletService) {
     $scope.decryptWallet = function() {
         $scope.wallet = null;
         try {
-            if ($scope.showPDecrypt && $scope.requirePPass) {
-                $scope.wallet = Wallet.fromMyEtherWalletKey($scope.manualprivkey, $scope.privPassword);
-                walletService.password = $scope.privPassword;
-            } else if ($scope.showPDecrypt && !$scope.requirePPass) {
-                if (!$scope.Validator.isValidHex($scope.manualprivkey)) {
-                    $scope.notifier.danger(globalFuncs.errorMsgs[37]);
-                    return;
-                }
-                $scope.wallet = new Wallet(fixPkey($scope.manualprivkey));
-                walletService.password = '';
-            } else if ($scope.showFDecrypt) {
-                $scope.wallet = Wallet.getWalletFromPrivKeyFile($scope.fileContent, $scope.filePassword);
-                walletService.password = $scope.filePassword;
-            } else if ($scope.showMDecrypt) {
-                $scope.mnemonicModel = new Modal(document.getElementById('mnemonicModel'));
-                $scope.mnemonicModel.open();
-                $scope.onHDDPathChange($scope.mnemonicPassword);
-            } else if ($scope.showParityDecrypt) {
-                $scope.wallet = Wallet.fromParityPhrase($scope.parityPhrase);
+            if ($scope.showPDecrypt) {
+                $scope.wallet = Wallet.fromPrivateKey($scope.manualprivkey);
             }
             walletService.wallet = $scope.wallet;
         } catch (e) {

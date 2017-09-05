@@ -9,24 +9,14 @@ var viewWalletCtrl = function($scope, walletService) {
     $scope.pkeyVisible = false;
 
     walletService.wallet = null;
-    walletService.password = '';
     $scope.ajaxReq = ajaxReq;
     $scope.$watch(function() {
         if (walletService.wallet == null) return null;
-        return walletService.wallet.getAddressString();
+        return walletService.wallet.getAddress();
     }, function() {
         if (walletService.wallet == null) return;
         $scope.wallet = walletService.wallet;
         $scope.wd = true;
-        $scope.showEnc = walletService.password != '';
-        if (walletService.wallet.type == "default") $scope.blob = globalFuncs.getBlob("text/json;charset=UTF-8", $scope.wallet.toJSON());
-        if (walletService.password != '') {
-            $scope.blobEnc = globalFuncs.getBlob("text/json;charset=UTF-8", $scope.wallet.toV3(walletService.password, {
-                kdf: globalFuncs.kdf,
-                n: globalFuncs.scrypt.n
-            }));
-            $scope.encFileName = $scope.wallet.getV3Filename();
-        }
         $scope.wallet.setBalance();
         $scope.wallet.setTokens();
     });
@@ -39,7 +29,7 @@ var viewWalletCtrl = function($scope, walletService) {
 
     $scope.printQRCode = function() {
         globalFuncs.printPaperWallets(JSON.stringify([{
-            address: $scope.wallet.getChecksumAddressString(),
+            address: $scope.wallet.getAddress(),
             private: $scope.wallet.getPrivateKeyString()
         }]));
     }

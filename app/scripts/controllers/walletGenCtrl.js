@@ -12,17 +12,18 @@ var walletGenCtrl = function($scope) {
             $scope.wallet = Wallet.generate();
             $scope.showWallet = true;
             if (parent != null)
-                parent.postMessage(JSON.stringify({ address: $scope.wallet.getAddressString(), checksumAddress: $scope.wallet.getChecksumAddressString() }), "*");
+                parent.postMessage(JSON.stringify({ address: $scope.wallet.getAddress() }), "*");
             $scope.isDone = true;
         }
     }
     $scope.printQRCode = function() {
         globalFuncs.printPaperWallets(JSON.stringify([{
-            address: $scope.wallet.getChecksumAddressString(),
+            address: $scope.wallet.getAddress(),
             private: $scope.wallet.getPrivateKeyString()
         }]));
     }
     $scope.getAddress = function(){
+        $scope.wallet = null;
         $scope.showWallet = false;
         $scope.showGetAddress = true;
     }

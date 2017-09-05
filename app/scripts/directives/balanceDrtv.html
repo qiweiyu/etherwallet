@@ -3,8 +3,7 @@
   <div class="block">
     <h5 translate="sidebar_AccountAddr">Account Address</h5>
     <ul class="account-info">
-      <div class="addressIdenticon med float" blockie-address="{{wallet.getAddressString()}}" watch-var="wallet"></div>
-      <span class="mono wrap">{{wallet.getChecksumAddressString()}}</span>
+      <span class="mono wrap">{{wallet.getAddressString()}}</span>
       <label class="ens-response" ng-show="showEns()">
         ↳ <span class="mono ng-binding"> {{ensAddress}} </span>
       </label>
@@ -30,14 +29,9 @@
     </ul>
     <h5 translate="sidebar_TransHistory"> Transaction History</h5>
     <ul class="account-info">
-      <li ng-show="ajaxReq.type != 'CUS'">
-        <a href="{{ajaxReq.blockExplorerAddr.replace('[[address]]', wallet.getAddressString())}}" target="_blank" rel="noopener">
-          {{ajaxReq.type}} ({{ajaxReq.blockExplorerTX.replace('/tx/[[txHash]]', '')}})
-        </a>
-      </li>
       <li>
-        <a href="https://ethplorer.io/address/{{wallet.getAddressString()}}" target="_blank" rel="noopener">
-          Tokens (Ethplorer.io)
+        <a href="https://skynet.qtum.info/address/{{wallet.getAddressString()}}" target="_blank" rel="noopener">
+          Insight (https://skynet.qtum.info)
         </a>
       </li>
     </ul>

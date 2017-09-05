@@ -1,6 +1,6 @@
 <main class="tab-pane block--container active" ng-if="globalService.currentTab==globalService.tabs.generateWallet.id" ng-controller='walletGenCtrl' role="main" ng-cloak>
 
-  <article class="block__wrap gen__1" ng-show="!wallet">
+  <article class="block__wrap gen__1" ng-show="!wallet && !showGetAddress">
 
     <section class="block__main gen__1--inner">
       <br />
@@ -110,9 +110,8 @@
 
   </article>
 
-  <article class="text-left" ng-show="wallet && showGetAddress">
+  <article class="text-left" ng-show="showGetAddress">
     <div class="clearfix collapse-container">
-<!--
       <div ng-click="wd = !wd">
         <a class="collapse-button"><span ng-show="wd">+</span><span ng-show="!wd">-</span></a>
         <h1 traslate="GEN_Unlock">Unlock your wallet to see your address</h1>
@@ -123,7 +122,6 @@
           @@if (site === 'cx' )  {  <cx-wallet-decrypt-drtv></cx-wallet-decrypt-drtv>   }
       </div>
     </div>
--->
 
     <div class="row" ng-show="wallet!=null" ng-controller='viewWalletCtrl'>
 
