@@ -3,7 +3,7 @@
 <html lang="en" ng-app="mewApp">
 <head>
 <meta charset="utf-8">
-<title>MyEtherWallet.com</title>
+<title>MyQtumWallet.com</title>
 <link rel="canonical" href="https://www.myetherwallet.com" />
 <meta name="description" content="MyEtherWallet.com is a free, open-source, client-side interface for generating Ethereum wallets &amp; more. Interact with the Ethereum blockchain easily &amp; securely. Double-check the URL ( .com ) before unlocking your wallet.">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -227,39 +227,16 @@
 
     <main class="tab-pane block--container active" ng-if="globalService.currentTab==globalService.tabs.generateWallet.id" ng-controller='walletGenCtrl' role="main" ng-cloak>
 
-  <article class="block__wrap gen__1" ng-show="!wallet && !showGetAddress">
+  <article class="block__wrap gen__1" ng-show="!wallet">
 
     <section class="block__main gen__1--inner">
       <br />
       <h1 translate="NAV_GenerateWallet" aria-live="polite"> Create New Wallet</h1>
       <a tabindex="0" role="button" class="btn btn-primary" func="generateSingleWallet" ng-click="genNewWallet()" translate="NAV_GenerateWallet">Generate Wallet</a>
-      <p translate="x_PasswordDesc"> </p>
       <br>
     </section>
 
     <section class="block__help">
-      <h2>Ledger / TREZOR:</h2>
-      <ul><li>
-        <span translate="GEN_Help_1">Use your</span>
-        <a ng-click="globalService.currentTab=globalService.tabs.sendTransaction.id">Ledger or TREZOR or Digital Bitbox</a>
-        <span translate="GEN_Help_2">to access your account.</span>
-        <span translate="GEN_Help_3">Your device * is * your wallet.</span>
-      </li></ul>
-
-      <h2>Jaxx / Metamask:</h2>
-      <ul><li>
-        <span translate="GEN_Help_1">Use your</span>
-        <a ng-click="globalService.currentTab=globalService.tabs.sendTransaction.id" translate="x_Mnemonic">Mnemonic Phrase</a>
-        <span translate="GEN_Help_2">to access your account.</span>
-      </li></ul>
-
-      <h2>Mist / Geth / Parity:</h2>
-      <ul><li>
-        <span translate="GEN_Help_1">Use your</span>
-        <a ng-click="globalService.currentTab=globalService.tabs.sendTransaction.id" translate="x_Keystore2">Keystore File (UTC / JSON)</a>
-        <span translate="GEN_Help_2">to access your account.</span>
-      </li></ul>
-
       <h2 translate="GEN_Help_4">Guides &amp; FAQ</h2>
       <ul>
         <li><strong>
@@ -276,7 +253,7 @@
 
   </article>
 
-  <article role="main" class="block__wrap gen__3" ng-show="wallet && showWallet">
+  <article role="main" class="block__wrap gen__3" ng-show="wallet">
 
     <section class="block__main gen__3--inner">
 
@@ -301,10 +278,6 @@
       </div>
 
       <br />
-
-      <a class="btn btn-default btn-sm" ng-click="getAddress()">
-        <span translate="GEN_Label_3"> Save your Address </span> →
-      </a>
 
     </section>
 
@@ -335,98 +308,6 @@
 
     </section>
 
-  </article>
-
-  <article class="text-left" ng-show="showGetAddress">
-    <div class="clearfix collapse-container">
-      <div ng-click="wd = !wd">
-        <a class="collapse-button"><span ng-show="wd">+</span><span ng-show="!wd">-</span></a>
-        <h1 traslate="GEN_Unlock">Unlock your wallet to see your address</h1>
-        <p translate="x_AddessDesc"></p>
-      </div>
-      <div ng-show="!wd">
-            <wallet-decrypt-drtv></wallet-decrypt-drtv>         
-          
-      </div>
-    </div>
-
-    <div class="row" ng-show="wallet!=null" ng-controller='viewWalletCtrl'>
-
-      
-        <article class="col-sm-8 view-wallet-content">
-
-  <section class="block">
-    <div class="col-xs-12">
-      <div class="account-help-icon">
-        <img src="images/icon-help.svg" class="help-icon" />
-        <p class="account-help-text" translate="x_AddessDesc">You may know this as your "Account #" or your "Public Key". It's what you send people so they can send you ETH. That icon is an easy way to recognize your address.</p>
-        <h5 translate="x_Address">Your Address:</h5>
-      </div>
-      <input class="form-control" type="text" ng-value="wallet.getAddressString()" readonly="readonly">
-    </div>
-
-    <div class="col-xs-12" ng-show='showEnc'>
-      <div class="account-help-icon">
-        <img src="images/icon-help.svg" class="help-icon" />
-        <p class="account-help-text" translate="x_KeystoreDesc">This Keystore / JSON file matches the format used by Mist & Geth so you can easily import it in the future. It is the recommended file to download and back up.</p>
-        <h5 translate="x_Keystore">Keystore/JSON File (Recommended • Encrypted • Mist/Geth Format)</h5>
-      </div>
-      <a class="btn btn-info btn-block" href="{{blobEnc}}" download="{{encFileName}}" translate="x_Download"> DOWNLOAD </a>
-    </div>
-
-    <div class="col-xs-12" ng-show="wallet.type=='default'">
-      <div class="account-help-icon">
-        <img src="images/icon-help.svg" class="help-icon" />
-        <p class="account-help-text" translate="x_PrivKeyDesc">This is the unencrypted text version of your private key, meaning no password is necessary. If someone were to find your unencrypted private key, they could access your wallet without a password. For this reason, encrypted versions are typically recommended.</p>
-        <h5>
-          <span translate="x_PrivKey">Private Key (unencrypted)</span>
-        </h5>
-      </div>
-      <div class="input-group">
-        <input class="form-control no-animate" type="{{pkeyVisible ? 'text' : 'password'}}" ng-value="wallet.getPrivateKeyString()" readonly="readonly">
-        <span tabindex="0" aria-label="make private key visible" role="button" class="input-group-addon eye" ng-click="showHidePkey()"></span>
-      </div>
-    </div>
-
-
-    <div class="col-xs-12" ng-show="wallet.type=='default'">
-      <div class="account-help-icon">
-        <img src="images/icon-help.svg" class="help-icon" />
-        <p class="account-help-text" translate="x_PrintDesc">ProTip: Click print and save this as a PDF, even if you do not own a printer!</p>
-        <h5 translate="x_Print">Print Paper Wallet:</h5>
-      </div>
-      <a class="btn btn-info btn-block" ng-click="printQRCode()" translate="x_Print">Print Paper Wallet</a>
-    </div>
-  </section>
-
-  <section class="block">
-    <div class="col-xs-6">
-      <h5 translate="x_Address">Your Address:</h5>
-      <div class="qr-code" qr-code="{{wallet.getQrAddressString()}}" watch-var="wallet" width="100%"></div>
-    </div>
-    <div class="col-xs-6">
-      <h5 ng-show="wallet.type=='default'">
-        <span translate="x_PrivKey">Private Key (unencrypted)</span>
-      </h5>
-      <div class="qr-pkey-container" ng-show="wallet.type=='default'">
-        <div class="qr-overlay" ng-show="!pkeyVisible"></div>
-        <div class="qr-code" qr-code="{{wallet.getPrivateKeyString()}}" watch-var="wallet" width="100%"></div>
-        <div class="input-group">
-          <input class="form-control no-animate" type="{{pkeyVisible ? 'text' : 'password'}}" ng-value="wallet.getPrivateKeyString()" readonly="readonly" style="display:none;width:0;height:0;padding:0">
-          <span tabindex="0" aria-label="make private key visible" role="button" class="input-group-addon eye" ng-click="showHidePkey()"></span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-</article>
-
-<article class="col-sm-4">
-  <wallet-balance-drtv></wallet-balance-drtv>
-</article>
-   
-
-    </div>
   </article>
 
 </main>

@@ -34,6 +34,7 @@ var tabs = {
     mew: true,
     cx: true
   },
+  /*
   swap: {
     id: 4,
     name: "NAV_Swap",
@@ -41,6 +42,7 @@ var tabs = {
     mew: true,
     cx: true
   },
+  */
   offlineTransaction: {
     id: 5,
     name: "NAV_Offline",
@@ -55,6 +57,7 @@ var tabs = {
     mew: true,
     cx: true
   },
+  /*
   ens: {
     id:7,
     name: "NAV_ENS",
@@ -62,6 +65,7 @@ var tabs = {
     mew: true,
     cx: true
   },
+  */
   txStatus: {
     id: 8,
     name: "NAV_CheckTxStatus",

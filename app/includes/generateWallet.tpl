@@ -1,38 +1,15 @@
 <main class="tab-pane block--container active" ng-if="globalService.currentTab==globalService.tabs.generateWallet.id" ng-controller='walletGenCtrl' role="main" ng-cloak>
 
-  <article class="block__wrap gen__1" ng-show="!wallet && !showGetAddress">
+  <article class="block__wrap gen__1" ng-show="!wallet">
 
     <section class="block__main gen__1--inner">
       <br />
       <h1 translate="NAV_GenerateWallet" aria-live="polite"> Create New Wallet</h1>
       <a tabindex="0" role="button" class="btn btn-primary" func="generateSingleWallet" ng-click="genNewWallet()" translate="NAV_GenerateWallet">Generate Wallet</a>
-      <p translate="x_PasswordDesc"> </p>
       <br>
     </section>
 
     <section class="block__help">
-      <h2>Ledger / TREZOR:</h2>
-      <ul><li>
-        <span translate="GEN_Help_1">Use your</span>
-        <a ng-click="globalService.currentTab=globalService.tabs.sendTransaction.id">Ledger or TREZOR or Digital Bitbox</a>
-        <span translate="GEN_Help_2">to access your account.</span>
-        <span translate="GEN_Help_3">Your device * is * your wallet.</span>
-      </li></ul>
-
-      <h2>Jaxx / Metamask:</h2>
-      <ul><li>
-        <span translate="GEN_Help_1">Use your</span>
-        <a ng-click="globalService.currentTab=globalService.tabs.sendTransaction.id" translate="x_Mnemonic">Mnemonic Phrase</a>
-        <span translate="GEN_Help_2">to access your account.</span>
-      </li></ul>
-
-      <h2>Mist / Geth / Parity:</h2>
-      <ul><li>
-        <span translate="GEN_Help_1">Use your</span>
-        <a ng-click="globalService.currentTab=globalService.tabs.sendTransaction.id" translate="x_Keystore2">Keystore File (UTC / JSON)</a>
-        <span translate="GEN_Help_2">to access your account.</span>
-      </li></ul>
-
       <h2 translate="GEN_Help_4">Guides &amp; FAQ</h2>
       <ul>
         <li><strong>
@@ -49,7 +26,7 @@
 
   </article>
 
-  <article role="main" class="block__wrap gen__3" ng-show="wallet && showWallet">
+  <article role="main" class="block__wrap gen__3" ng-show="wallet">
 
     <section class="block__main gen__3--inner">
 
@@ -74,10 +51,6 @@
       </div>
 
       <br />
-
-      <a class="btn btn-default btn-sm" ng-click="getAddress()">
-        <span translate="GEN_Label_3"> Save your Address </span> →
-      </a>
 
     </section>
 
@@ -108,27 +81,6 @@
 
     </section>
 
-  </article>
-
-  <article class="text-left" ng-show="showGetAddress">
-    <div class="clearfix collapse-container">
-      <div ng-click="wd = !wd">
-        <a class="collapse-button"><span ng-show="wd">+</span><span ng-show="!wd">-</span></a>
-        <h1 traslate="GEN_Unlock">Unlock your wallet to see your address</h1>
-        <p translate="x_AddessDesc"></p>
-      </div>
-      <div ng-show="!wd">
-          @@if (site === 'mew' ) {  <wallet-decrypt-drtv></wallet-decrypt-drtv>         }
-          @@if (site === 'cx' )  {  <cx-wallet-decrypt-drtv></cx-wallet-decrypt-drtv>   }
-      </div>
-    </div>
-
-    <div class="row" ng-show="wallet!=null" ng-controller='viewWalletCtrl'>
-
-      @@if (site === 'cx' ) {  @@include( './viewWalletInfo-content.tpl', { "site": "cx" } )    }
-      @@if (site === 'mew') {  @@include( './viewWalletInfo-content.tpl', { "site": "mew" } )   }
-
-    </div>
   </article>
 
 </main>
