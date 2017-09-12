@@ -26,9 +26,6 @@ var addressFieldDrtv = function($compile) {
                     <label translate=\"' + labelTranslated + '\"></label>\n \
                     <input class=\"form-control\" type=\"text\" placeholder=\"' + placeholder + '\" ng-model=\"addressDrtv.ensAddressField\" ng-disabled=\"addressDrtv.readOnly\" ng-class=\"Validator.isValidENSorEtherAddress(' + varName + ') ? \'is-valid\' : \'is-invalid\'\"/>\n \
                     <p class="ens-response" ng-show="addressDrtv.showDerivedAddress"> ↳ <span class="mono ng-binding"> {{addressDrtv.derivedAddress}} </span> </p>\n \
-                </div>\n \
-                <div class=\"col-xs-1 address-identicon-container\">\n \
-                   <div class=\"addressIdenticon\" title=\"Address Indenticon\" blockie-address=\"{{' + varName + '}}\" watch-var=\"' + varName + '\"></div>\n \
                 </div>');
             scope.$watch('addressDrtv.ensAddressField', function() {
                 var _ens = new ens();

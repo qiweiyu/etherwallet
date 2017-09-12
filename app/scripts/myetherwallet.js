@@ -14,6 +14,8 @@ Wallet.generate = function() {
     return new Wallet(ethUtil.crypto.randomBytes(32))
 }
 Wallet.prototype.setTokens = function() {
+    //todo
+    return
     this.tokenObjs = [];
     var tokens = Token.popTokens;
     for (var i = 0; i < tokens.length; i++) {
@@ -30,9 +32,11 @@ Wallet.prototype.setBalance = function(callback) {
     var parentObj = this;
     this.balance = this.usdBalance = this.eurBalance = this.btcBalance = this.chfBalance = this.repBalance =  this.gbpBalance = 'loading';
     ajaxReq.getBalance(parentObj.getAddressString(), function(data) {
+	window.data = data;
         if (data.error) parentObj.balance = data.msg;
         else {
-            parentObj.balance = etherUnits.toEther(data.data.balance, 'wei');
+            parentObj.balance = data.data.balance;
+            /* todo
             ajaxReq.getETHvalue(function(data) {
                 parentObj.usdPrice   = etherUnits.toFiat('1', 'ether', data.usd);
                 parentObj.gbpPrice   = etherUnits.toFiat('1', 'ether', data.gbp);
@@ -49,12 +53,11 @@ Wallet.prototype.setBalance = function(callback) {
                 parentObj.repBalance = etherUnits.toFiat(parentObj.balance, 'ether', data.rep);
                 if(callback) callback();
             });
+            */
         }
     });
 }
 Wallet.prototype.getBalance = function() {
-    //todo
-    return '0QTUM';
     return this.balance;
 }
 Wallet.prototype.getPath = function() {

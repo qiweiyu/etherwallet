@@ -7,6 +7,7 @@ var viewWalletCtrl = function($scope, walletService) {
     $scope.etherBalance = "loading";
     $scope.tokenVisibility = "hidden";
     $scope.pkeyVisible = false;
+    $scope.wd = false;
 
     walletService.wallet = null;
     $scope.ajaxReq = ajaxReq;

@@ -13,7 +13,8 @@ nodes.nodeTypes = {
     RSK: "RSK",
     EXP: "EXP",
     UBQ: "UBQ",
-    Custom: "CUSTOM ETH"
+    Custom: "CUSTOM ETH",
+    QTUM: "QTUM"
 };
 nodes.ensNodeTypes = [nodes.nodeTypes.ETH, nodes.nodeTypes.Ropsten];
 nodes.customNodeObj = {
@@ -175,6 +176,19 @@ nodes.nodeList = {
         'estimateGas': true,
         'service': 'ubiqscan.io',
         'lib': new nodes.customNode('https://rpc1.ubiqscan.io', '')
+    },
+    'electrum': {
+        'name': 'Electrum',
+        'blockExplorerTX': 'https://skynet.qtum.info/tx/[[txHash]]',
+        'blockExplorerAddr': 'https://skynet.qtum.info/address/[[address]]',
+        'type': nodes.nodeTypes.QTUM,
+        'eip155': true,
+        'chainId': 8,
+        'tokenList': require('./tokens/ubqTokens.json'),
+        'abiList': [],//require('./abiDefinitions/ubqAbi.json'),
+        'estimateGas': true,
+        'service': 'Electrum',
+        'lib': require('./nodeHelpers/electrum')
     }
 };
 

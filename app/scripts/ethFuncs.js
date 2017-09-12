@@ -2,11 +2,16 @@
 var ethFuncs = function() {}
 ethFuncs.gasAdjustment = 21;
 ethFuncs.validateEtherAddress = function(address) {
-    if (address.substring(0, 2) != "0x") return false;
-    else if (!/^(0x)?[0-9a-f]{40}$/i.test(address)) return false;
-    else if (/^(0x)?[0-9a-f]{40}$/.test(address) || /^(0x)?[0-9A-F]{40}$/.test(address)) return true;
-    else
-        return this.isChecksumAddress(address);
+    if (address) {
+        try {
+            var decode = bitcoinUtil.address.fromBase58Check(address);
+            return decode.version == bitcoinUtil.networks.bitcoin.pubKeyHash;
+        }
+        catch (e) {
+            return false;
+        }
+    }
+    return false;
 }
 ethFuncs.isChecksumAddress = function(address) {
     return address == ethUtil.toChecksumAddress(address);

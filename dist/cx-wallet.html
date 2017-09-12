@@ -82,7 +82,7 @@
             <li><a data-toggle="modal" data-target="#disclaimerModal" translate="FOOTER_4"> Disclaimer </a></li>
           </ul>
         </span>
-
+<!--
         <span class="dropdown dropdown-gas" ng-cloak>
           <a tabindex="0" aria-haspopup="true" aria-label="adjust gas price" class="dropdown-toggle  btn btn-white" ng-click="dropdownGasPrice = !dropdownGasPrice">
             <span translate="OFFLINE_Step2_Label_3">Gas Price</span>: {{gas.value}} Gwei
@@ -100,8 +100,9 @@
             </div>
           </ul>
         </span>
-
+-->
         <!-- Warning: The separators you see on the frontend are in styles/etherwallet-custom.less. If you add / change a node, you have to adjust these. Ping tayvano if you're not a CSS wizard -->
+          <!--
         <span class="dropdown dropdown-node" ng-cloak>
           <a tabindex="0" aria-haspopup="true" aria-label="change node. current node {{curNode.name}} node by {{curNode.service}}" class="dropdown-toggle  btn btn-white" ng-click="dropdownNode = !dropdownNode">
             Network: {{curNode.name}} <small>({{curNode.service}})</small>
@@ -116,7 +117,7 @@
             <li><a ng-click="customNodeModal.open(); dropdownNode = !dropdownNode;"> Add Custom Node </a></li>
           </ul>
         </span>
-
+-->
       </div>
     </section>
   </section>
@@ -129,7 +130,8 @@
         
         <li ng-repeat="tab in tabNames track by $index" class="nav-item {{tab.name}}" ng-class="{active: $index==gService.currentTab}" ng-show="tab.cx" ng-click="tabClick($index)"> <a tabindex="0" aria-label="nav item: {{tab.name | translate}}" translate="{{tab.name}}"></a></li>
         
-        <li class="nav-item help"><a href="https://myetherwallet.groovehq.com/help_center" target="_blank" rel="noopener">Help</a></li>
+          <!--
+        <li class="nav-item help"><a href="https://myetherwallet.groovehq.com/help_center" target="_blank" rel="noopener">Help</a></li>-->
       </ul>
     </div>
     <a aria-hidden="true" ng-show="showRightArrow" class="nav-arrow-right" ng-click="scrollRight(100);" ng-mouseover="scrollHoverIn(false,2);" ng-mouseleave="scrollHoverOut()">&#187;</a>
@@ -870,7 +872,7 @@
 
     <!-- To Address -->
     <div class="row form-group">
-      <address-field placeholder="0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8" var-name="tx.to"></address-field>
+      <address-field placeholder="QTTLepzp1ftVvmfP7QpQpr8DwYPWktcEXV" var-name="tx.to"></address-field>
     </div>
 
     <!-- Amount to Send -->
@@ -887,7 +889,7 @@
           <strong>{{unitReadable}}<i class="caret"></i></strong>
         </a>
         <ul class="dropdown-menu dropdown-menu-right" ng-show="dropdownAmount && !tx.readOnly">
-          <li><a ng-class="{true:'active'}[tx.sendMode=='ether']" ng-click="setSendMode('ether')">{{ajaxReq.type}}</a></li>
+          <li><a ng-class="{true:'active'}[tx.sendMode=='qtum']" ng-click="setSendMode('qtum')">{{ajaxReq.type}}</a></li>
           <li ng-repeat="token in wallet.tokenObjs track by $index" ng-show="token.balance!=0 && token.balance!='loading' || token.type!=='default' || tokenVisibility=='shown'">
             <a ng-class="{true:'active'}[unitReadable == token.getSymbol()]" ng-click="setSendMode('token', $index, token.getSymbol())"> {{token.getSymbol()}} </a>
           </li>
@@ -905,27 +907,29 @@
           <img src="images/icon-help.svg" class="help-icon" />
           <p class="account-help-text" translate="GAS_LIMIT_Desc"></p>
         </a>
-        <label translate="TRANS_gas"> Gas Limit: </label>
+        <label translate="TRANS_fee"> Fee: </label>
         <input type="text"
                class="form-control"
-               placeholder="21000"
-               ng-model="tx.gasLimit"
-               ng-change="gasLimitChanged=true"
+               placeholder="0.1"
+               ng-model="tx.fee"
+               ng-change="feeChanged=true"
                ng-disabled="tx.readOnly || checkTxReadOnly"
-               ng-class="Validator.isPositiveNumber(tx.gasLimit) ? 'is-valid' : 'is-invalid'" />
+               ng-class="Validator.isPositiveNumber(tx.fee) ? 'is-valid' : 'is-invalid'" />
       </div>
     </div>
     <!-- / Gas Limit -->
 
     <!-- Advanced Option Panel -->
+      <!-- todo
     <a ng-click="showAdvance=true" ng-show='globalService.currentTab==globalService.tabs.sendTransaction.id'>
       <p class="strong" translate="TRANS_advanced"> + Advanced: Add Data </p>
     </a>
+    -->
 
     <section ng-show="showAdvance || checkTxPage">
       <!-- Data -->
       <div class="row form-group">
-        <div class="col-sm-11 clearfix" ng-show="tx.sendMode=='ether'">
+        <div class="col-sm-11 clearfix" ng-show="tx.sendMode=='qtum'">
           <span class="account-help-icon">
             <img src="images/icon-help.svg" class="help-icon" />
             <p class="account-help-text" translate="OFFLINE_Step2_Label_6b">This is optional.</p>
@@ -996,11 +1000,13 @@
     </div>
 
     <div class="row form-group" ng-show="showRaw">
+        <!-- todo
       <div class="col-sm-6">
         <label translate="SEND_raw"> Raw Transaction </label>
         <textarea class="form-control" rows="4" readonly >{{rawTx}}</textarea>
       </div>
-      <div class="col-sm-6">
+      -->
+      <div class="col-sm-12">
         <label translate="SEND_signed"> Signed Transaction </label>
         <textarea class="form-control" rows="4" readonly >{{signedTx}}</textarea>
       </div>
@@ -1042,20 +1048,17 @@
         <table class="table text-center"><tbody><tr>
 
           <td>
-            <div class="addressIdenticon med" title="Address Indenticon" blockie-address="{{wallet.getAddressString()}}" watch-var="wallet.getAddressString()"></div>
-            <p><strong ng-show="tx.sendMode=='ether'" class="send-modal__addr">{{wallet.getChecksumAddressString()}}</strong></p>
+            <p><strong ng-show="tx.sendMode=='qtum'" class="send-modal__addr">{{wallet.getAddressString()}}</strong></p>
           </td>
 
-          <td ng-show="tx.sendMode=='ether'" class="mono">-><br /><h4 class="text-danger">{{tx.value}} {{unitReadable}}</h4></td>
-          <td ng-show="tx.sendMode!=='ether'" class="mono">-><br /><h4 class="text-danger">{{tx.value}} {{unitReadable}}</h4></td>
+          <td ng-show="tx.sendMode=='qtum'" class="mono">-><br /><h4 class="text-danger">{{tx.value}} {{unitReadable}}</h4></td>
+          <td ng-show="tx.sendMode!=='qtum'" class="mono">-><br /><h4 class="text-danger">{{tx.value}} {{unitReadable}}</h4></td>
 
-          <td ng-show="tx.sendMode=='ether'">
-            <div class="addressIdenticon med" title="Address Indenticon" blockie-address="{{tx.to}}" watch-var="tx.to"></div>
-            <p><strong ng-show="tx.sendMode=='ether'" class="send-modal__addr">{{tx.to}}</strong></p>
+          <td ng-show="tx.sendMode=='qtum'">
+            <p><strong ng-show="tx.sendMode=='qtum'" class="send-modal__addr">{{tx.to}}</strong></p>
           </td>
-          <td ng-show="tx.sendMode!=='ether'">
-            <div class="addressIdenticon med" title="Address Indenticon" blockie-address="{{tokenTx.to}}" watch-var="tokenTx.to"></div>
-            <p><strong ng-show="tx.sendMode=='ether'" class="send-modal__addr">{{tokenTx.to}}</strong></p>
+          <td ng-show="tx.sendMode!=='qtum'">
+            <p><strong ng-show="tx.sendMode=='qtum'" class="send-modal__addr">{{tokenTx.to}}</strong></p>
           </td>
 
         </tr></tbody></table>
@@ -1064,12 +1067,12 @@
 
         <p>
           <span translate="SENDModal_Content_1">You are about to send</span>
-          <strong ng-show="tx.sendMode=='ether'" class="mono">{{tx.value}} {{unitReadable}}</strong>
-          <strong ng-show="tx.sendMode!=='ether'" class="mono">{{tokenTx.value}} {{unitReadable}}</strong>
+          <strong ng-show="tx.sendMode=='qtum'" class="mono">{{tx.value}} {{unitReadable}}</strong>
+          <strong ng-show="tx.sendMode!=='qtum'" class="mono">{{tokenTx.value}} {{unitReadable}}</strong>
           <br />
           <span translate="SENDModal_Content_2">to address</span>
-          <strong ng-show="tx.sendMode=='ether'" class="mono"> {{tx.to}}. </strong>
-          <strong ng-show="tx.sendMode!=='ether'" class="mono"> {{tokenTx.to}} </strong>
+          <strong ng-show="tx.sendMode=='qtum'" class="mono"> {{tx.to}}. </strong>
+          <strong ng-show="tx.sendMode!=='qtum'" class="mono"> {{tokenTx.to}} </strong>
         </p>
 
         <p> You are interacting with the <strong>{{ajaxReq.type}} chain</strong>, provided by <strong>{{ajaxReq.service}}</strong>.</p>
@@ -1355,7 +1358,7 @@
 
     <!-- To Address -->
     <div class="row form-group">
-      <address-field placeholder="0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8" var-name="tx.to"></address-field>
+      <address-field placeholder="QTTLepzp1ftVvmfP7QpQpr8DwYPWktcEXV" var-name="tx.to"></address-field>
     </div>
 
     <!-- Amount to Send -->
@@ -1372,7 +1375,7 @@
           <strong>{{unitReadable}}<i class="caret"></i></strong>
         </a>
         <ul class="dropdown-menu dropdown-menu-right" ng-show="dropdownAmount && !tx.readOnly">
-          <li><a ng-class="{true:'active'}[tx.sendMode=='ether']" ng-click="setSendMode('ether')">{{ajaxReq.type}}</a></li>
+          <li><a ng-class="{true:'active'}[tx.sendMode=='qtum']" ng-click="setSendMode('qtum')">{{ajaxReq.type}}</a></li>
           <li ng-repeat="token in wallet.tokenObjs track by $index" ng-show="token.balance!=0 && token.balance!='loading' || token.type!=='default' || tokenVisibility=='shown'">
             <a ng-class="{true:'active'}[unitReadable == token.getSymbol()]" ng-click="setSendMode('token', $index, token.getSymbol())"> {{token.getSymbol()}} </a>
           </li>
@@ -1390,27 +1393,29 @@
           <img src="images/icon-help.svg" class="help-icon" />
           <p class="account-help-text" translate="GAS_LIMIT_Desc"></p>
         </a>
-        <label translate="TRANS_gas"> Gas Limit: </label>
+        <label translate="TRANS_fee"> Fee: </label>
         <input type="text"
                class="form-control"
-               placeholder="21000"
-               ng-model="tx.gasLimit"
-               ng-change="gasLimitChanged=true"
+               placeholder="0.1"
+               ng-model="tx.fee"
+               ng-change="feeChanged=true"
                ng-disabled="tx.readOnly || checkTxReadOnly"
-               ng-class="Validator.isPositiveNumber(tx.gasLimit) ? 'is-valid' : 'is-invalid'" />
+               ng-class="Validator.isPositiveNumber(tx.fee) ? 'is-valid' : 'is-invalid'" />
       </div>
     </div>
     <!-- / Gas Limit -->
 
     <!-- Advanced Option Panel -->
+      <!-- todo
     <a ng-click="showAdvance=true" ng-show='globalService.currentTab==globalService.tabs.sendTransaction.id'>
       <p class="strong" translate="TRANS_advanced"> + Advanced: Add Data </p>
     </a>
+    -->
 
     <section ng-show="showAdvance || checkTxPage">
       <!-- Data -->
       <div class="row form-group">
-        <div class="col-sm-11 clearfix" ng-show="tx.sendMode=='ether'">
+        <div class="col-sm-11 clearfix" ng-show="tx.sendMode=='qtum'">
           <span class="account-help-icon">
             <img src="images/icon-help.svg" class="help-icon" />
             <p class="account-help-text" translate="OFFLINE_Step2_Label_6b">This is optional.</p>
@@ -1481,11 +1486,13 @@
     </div>
 
     <div class="row form-group" ng-show="showRaw">
+        <!-- todo
       <div class="col-sm-6">
         <label translate="SEND_raw"> Raw Transaction </label>
         <textarea class="form-control" rows="4" readonly >{{rawTx}}</textarea>
       </div>
-      <div class="col-sm-6">
+      -->
+      <div class="col-sm-12">
         <label translate="SEND_signed"> Signed Transaction </label>
         <textarea class="form-control" rows="4" readonly >{{signedTx}}</textarea>
       </div>
@@ -1527,20 +1534,17 @@
         <table class="table text-center"><tbody><tr>
 
           <td>
-            <div class="addressIdenticon med" title="Address Indenticon" blockie-address="{{wallet.getAddressString()}}" watch-var="wallet.getAddressString()"></div>
-            <p><strong ng-show="tx.sendMode=='ether'" class="send-modal__addr">{{wallet.getChecksumAddressString()}}</strong></p>
+            <p><strong ng-show="tx.sendMode=='qtum'" class="send-modal__addr">{{wallet.getAddressString()}}</strong></p>
           </td>
 
-          <td ng-show="tx.sendMode=='ether'" class="mono">-><br /><h4 class="text-danger">{{tx.value}} {{unitReadable}}</h4></td>
-          <td ng-show="tx.sendMode!=='ether'" class="mono">-><br /><h4 class="text-danger">{{tx.value}} {{unitReadable}}</h4></td>
+          <td ng-show="tx.sendMode=='qtum'" class="mono">-><br /><h4 class="text-danger">{{tx.value}} {{unitReadable}}</h4></td>
+          <td ng-show="tx.sendMode!=='qtum'" class="mono">-><br /><h4 class="text-danger">{{tx.value}} {{unitReadable}}</h4></td>
 
-          <td ng-show="tx.sendMode=='ether'">
-            <div class="addressIdenticon med" title="Address Indenticon" blockie-address="{{tx.to}}" watch-var="tx.to"></div>
-            <p><strong ng-show="tx.sendMode=='ether'" class="send-modal__addr">{{tx.to}}</strong></p>
+          <td ng-show="tx.sendMode=='qtum'">
+            <p><strong ng-show="tx.sendMode=='qtum'" class="send-modal__addr">{{tx.to}}</strong></p>
           </td>
-          <td ng-show="tx.sendMode!=='ether'">
-            <div class="addressIdenticon med" title="Address Indenticon" blockie-address="{{tokenTx.to}}" watch-var="tokenTx.to"></div>
-            <p><strong ng-show="tx.sendMode=='ether'" class="send-modal__addr">{{tokenTx.to}}</strong></p>
+          <td ng-show="tx.sendMode!=='qtum'">
+            <p><strong ng-show="tx.sendMode=='qtum'" class="send-modal__addr">{{tokenTx.to}}</strong></p>
           </td>
 
         </tr></tbody></table>
@@ -1549,12 +1553,12 @@
 
         <p>
           <span translate="SENDModal_Content_1">You are about to send</span>
-          <strong ng-show="tx.sendMode=='ether'" class="mono">{{tx.value}} {{unitReadable}}</strong>
-          <strong ng-show="tx.sendMode!=='ether'" class="mono">{{tokenTx.value}} {{unitReadable}}</strong>
+          <strong ng-show="tx.sendMode=='qtum'" class="mono">{{tx.value}} {{unitReadable}}</strong>
+          <strong ng-show="tx.sendMode!=='qtum'" class="mono">{{tokenTx.value}} {{unitReadable}}</strong>
           <br />
           <span translate="SENDModal_Content_2">to address</span>
-          <strong ng-show="tx.sendMode=='ether'" class="mono"> {{tx.to}}. </strong>
-          <strong ng-show="tx.sendMode!=='ether'" class="mono"> {{tokenTx.to}} </strong>
+          <strong ng-show="tx.sendMode=='qtum'" class="mono"> {{tx.to}}. </strong>
+          <strong ng-show="tx.sendMode!=='qtum'" class="mono"> {{tokenTx.to}} </strong>
         </p>
 
         <p> You are interacting with the <strong>{{ajaxReq.type}} chain</strong>, provided by <strong>{{ajaxReq.service}}</strong>.</p>
@@ -3081,7 +3085,7 @@ Rate: {{swapOrder.swapRate}} {{swapOrder.swapPair}}</textarea>
 
     <!-- To Address -->
     <div class="row form-group">
-      <address-field placeholder="0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8" var-name="tx.to"></address-field>
+      <address-field placeholder="QTTLepzp1ftVvmfP7QpQpr8DwYPWktcEXV" var-name="tx.to"></address-field>
     </div>
 
     <!-- Amount to Send -->
@@ -3098,7 +3102,7 @@ Rate: {{swapOrder.swapRate}} {{swapOrder.swapPair}}</textarea>
           <strong>{{unitReadable}}<i class="caret"></i></strong>
         </a>
         <ul class="dropdown-menu dropdown-menu-right" ng-show="dropdownAmount && !tx.readOnly">
-          <li><a ng-class="{true:'active'}[tx.sendMode=='ether']" ng-click="setSendMode('ether')">{{ajaxReq.type}}</a></li>
+          <li><a ng-class="{true:'active'}[tx.sendMode=='qtum']" ng-click="setSendMode('qtum')">{{ajaxReq.type}}</a></li>
           <li ng-repeat="token in wallet.tokenObjs track by $index" ng-show="token.balance!=0 && token.balance!='loading' || token.type!=='default' || tokenVisibility=='shown'">
             <a ng-class="{true:'active'}[unitReadable == token.getSymbol()]" ng-click="setSendMode('token', $index, token.getSymbol())"> {{token.getSymbol()}} </a>
           </li>
@@ -3116,27 +3120,29 @@ Rate: {{swapOrder.swapRate}} {{swapOrder.swapPair}}</textarea>
           <img src="images/icon-help.svg" class="help-icon" />
           <p class="account-help-text" translate="GAS_LIMIT_Desc"></p>
         </a>
-        <label translate="TRANS_gas"> Gas Limit: </label>
+        <label translate="TRANS_fee"> Fee: </label>
         <input type="text"
                class="form-control"
-               placeholder="21000"
-               ng-model="tx.gasLimit"
-               ng-change="gasLimitChanged=true"
+               placeholder="0.1"
+               ng-model="tx.fee"
+               ng-change="feeChanged=true"
                ng-disabled="tx.readOnly || checkTxReadOnly"
-               ng-class="Validator.isPositiveNumber(tx.gasLimit) ? 'is-valid' : 'is-invalid'" />
+               ng-class="Validator.isPositiveNumber(tx.fee) ? 'is-valid' : 'is-invalid'" />
       </div>
     </div>
     <!-- / Gas Limit -->
 
     <!-- Advanced Option Panel -->
+      <!-- todo
     <a ng-click="showAdvance=true" ng-show='globalService.currentTab==globalService.tabs.sendTransaction.id'>
       <p class="strong" translate="TRANS_advanced"> + Advanced: Add Data </p>
     </a>
+    -->
 
     <section ng-show="showAdvance || checkTxPage">
       <!-- Data -->
       <div class="row form-group">
-        <div class="col-sm-11 clearfix" ng-show="tx.sendMode=='ether'">
+        <div class="col-sm-11 clearfix" ng-show="tx.sendMode=='qtum'">
           <span class="account-help-icon">
             <img src="images/icon-help.svg" class="help-icon" />
             <p class="account-help-text" translate="OFFLINE_Step2_Label_6b">This is optional.</p>
@@ -3207,11 +3213,13 @@ Rate: {{swapOrder.swapRate}} {{swapOrder.swapPair}}</textarea>
     </div>
 
     <div class="row form-group" ng-show="showRaw">
+        <!-- todo
       <div class="col-sm-6">
         <label translate="SEND_raw"> Raw Transaction </label>
         <textarea class="form-control" rows="4" readonly >{{rawTx}}</textarea>
       </div>
-      <div class="col-sm-6">
+      -->
+      <div class="col-sm-12">
         <label translate="SEND_signed"> Signed Transaction </label>
         <textarea class="form-control" rows="4" readonly >{{signedTx}}</textarea>
       </div>
@@ -3253,20 +3261,17 @@ Rate: {{swapOrder.swapRate}} {{swapOrder.swapPair}}</textarea>
         <table class="table text-center"><tbody><tr>
 
           <td>
-            <div class="addressIdenticon med" title="Address Indenticon" blockie-address="{{wallet.getAddressString()}}" watch-var="wallet.getAddressString()"></div>
-            <p><strong ng-show="tx.sendMode=='ether'" class="send-modal__addr">{{wallet.getChecksumAddressString()}}</strong></p>
+            <p><strong ng-show="tx.sendMode=='qtum'" class="send-modal__addr">{{wallet.getAddressString()}}</strong></p>
           </td>
 
-          <td ng-show="tx.sendMode=='ether'" class="mono">-><br /><h4 class="text-danger">{{tx.value}} {{unitReadable}}</h4></td>
-          <td ng-show="tx.sendMode!=='ether'" class="mono">-><br /><h4 class="text-danger">{{tx.value}} {{unitReadable}}</h4></td>
+          <td ng-show="tx.sendMode=='qtum'" class="mono">-><br /><h4 class="text-danger">{{tx.value}} {{unitReadable}}</h4></td>
+          <td ng-show="tx.sendMode!=='qtum'" class="mono">-><br /><h4 class="text-danger">{{tx.value}} {{unitReadable}}</h4></td>
 
-          <td ng-show="tx.sendMode=='ether'">
-            <div class="addressIdenticon med" title="Address Indenticon" blockie-address="{{tx.to}}" watch-var="tx.to"></div>
-            <p><strong ng-show="tx.sendMode=='ether'" class="send-modal__addr">{{tx.to}}</strong></p>
+          <td ng-show="tx.sendMode=='qtum'">
+            <p><strong ng-show="tx.sendMode=='qtum'" class="send-modal__addr">{{tx.to}}</strong></p>
           </td>
-          <td ng-show="tx.sendMode!=='ether'">
-            <div class="addressIdenticon med" title="Address Indenticon" blockie-address="{{tokenTx.to}}" watch-var="tokenTx.to"></div>
-            <p><strong ng-show="tx.sendMode=='ether'" class="send-modal__addr">{{tokenTx.to}}</strong></p>
+          <td ng-show="tx.sendMode!=='qtum'">
+            <p><strong ng-show="tx.sendMode=='qtum'" class="send-modal__addr">{{tokenTx.to}}</strong></p>
           </td>
 
         </tr></tbody></table>
@@ -3275,12 +3280,12 @@ Rate: {{swapOrder.swapRate}} {{swapOrder.swapPair}}</textarea>
 
         <p>
           <span translate="SENDModal_Content_1">You are about to send</span>
-          <strong ng-show="tx.sendMode=='ether'" class="mono">{{tx.value}} {{unitReadable}}</strong>
-          <strong ng-show="tx.sendMode!=='ether'" class="mono">{{tokenTx.value}} {{unitReadable}}</strong>
+          <strong ng-show="tx.sendMode=='qtum'" class="mono">{{tx.value}} {{unitReadable}}</strong>
+          <strong ng-show="tx.sendMode!=='qtum'" class="mono">{{tokenTx.value}} {{unitReadable}}</strong>
           <br />
           <span translate="SENDModal_Content_2">to address</span>
-          <strong ng-show="tx.sendMode=='ether'" class="mono"> {{tx.to}}. </strong>
-          <strong ng-show="tx.sendMode!=='ether'" class="mono"> {{tokenTx.to}} </strong>
+          <strong ng-show="tx.sendMode=='qtum'" class="mono"> {{tx.to}}. </strong>
+          <strong ng-show="tx.sendMode!=='qtum'" class="mono"> {{tokenTx.to}} </strong>
         </p>
 
         <p> You are interacting with the <strong>{{ajaxReq.type}} chain</strong>, provided by <strong>{{ajaxReq.service}}</strong>.</p>

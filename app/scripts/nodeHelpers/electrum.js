@@ -1,34 +1,23 @@
 'use strict';
-var etherscan = function() {}
-etherscan.SERVERURL = "https://api.etherscan.io/api";
-etherscan.pendingPosts = [];
-etherscan.config = {
+var electrum = function() {}
+electrum.SERVERURL = "http://127.0.0.1:50001/";
+electrum.pendingPosts = [];
+electrum.config = {
     headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
     }
 };
 
-etherscan.getCurrentBlock = function(callback) {
-    this.post({
-        module: 'proxy',
-        action: 'eth_blockNumber'
-    }, function(data) {
+electrum.getCurrentBlock = function(callback) {
+    callback({ error: false, msg: '', data: new BigNumber(0).toString() });
+}
+electrum.getBalance = function(addr, callback) {
+    this.post('blockchain.address.get_balance', {'address':addr}, function(data) {
         if (data.error) callback({ error: true, msg: data.error.message, data: '' });
-        else callback({ error: false, msg: '', data: new BigNumber(data.result).toString() });
+        else callback({ error: false, msg: '', data: { address: addr, balance: data.result.confirmed/100000000 } });
     });
 }
-etherscan.getBalance = function(addr, callback) {
-    this.post({
-        module: 'account',
-        action: 'balance',
-        address: addr,
-        tag: 'latest'
-    }, function(data) {
-        if (data.message != 'OK') callback({ error: true, msg: data.message, data: '' });
-        else callback({ error: false, msg: '', data: { address: addr, balance: data.result } });
-    });
-}
-etherscan.getTransaction = function(txHash, callback) {
+electrum.getTransaction = function(txHash, callback) {
     this.post({
         module: 'proxy',
         action: 'eth_getTransactionByHash',
@@ -38,7 +27,13 @@ etherscan.getTransaction = function(txHash, callback) {
         else callback({ error: false, msg: '', data: data.result });
     });
 }
-etherscan.getTransactionData = function(addr, callback) {
+electrum.getUnspentTransactions = function(addr, callback) {
+    this.post('blockchain.address.listunspent', {'address':addr}, function(data) {
+        if (data.error) callback({ error: true, msg: data.error.message, data: '' });
+        else callback({ error: false, msg: '', data: data.result });
+    });
+}
+electrum.getTransactionData = function(addr, callback) {
     var response = { error: false, msg: '', data: { address: addr, balance: '', gasprice: '', nonce: '' } };
     var parentObj = this;
     parentObj.getBalance(addr, function(data) {
@@ -72,17 +67,13 @@ etherscan.getTransactionData = function(addr, callback) {
         });
     });
 }
-etherscan.sendRawTx = function(rawTx, callback) {
-    this.post({
-        module: 'proxy',
-        action: 'eth_sendRawTransaction',
-        hex: rawTx
-    }, function(data) {
+electrum.sendRawTx = function(rawTx, callback) {
+    this.post('blockchain.transaction.broadcast', {'raw_tx':rawTx}, function(data) {
         if (data.error) callback({ error: true, msg: data.error.message, data: '' });
         else callback({ error: false, msg: '', data: data.result });
     });
 }
-etherscan.getEstimatedGas = function(txobj, callback) {
+electrum.getEstimatedGas = function(txobj, callback) {
     this.post({
         module: 'proxy',
         action: 'eth_estimateGas',
@@ -95,7 +86,7 @@ etherscan.getEstimatedGas = function(txobj, callback) {
         else callback({ error: false, msg: '', data: data.result });
     });
 }
-etherscan.getEthCall = function(txobj, callback) {
+electrum.getEthCall = function(txobj, callback) {
     this.post({
         module: 'proxy',
         action: 'eth_call',
@@ -106,12 +97,11 @@ etherscan.getEthCall = function(txobj, callback) {
         else callback({ error: false, msg: '', data: data.result });
     });
 }
-etherscan.queuePost = function() {
+electrum.queuePost = function() {
     var data = this.pendingPosts[0].data;
     var callback = this.pendingPosts[0].callback;
     var parentObj = this;
-    data.apikey = 'DSH5B24BQYKD1AD8KUCDY3SAQSS6ZAU175';
-    ajaxReq.http.post(this.SERVERURL, ajaxReq.postSerializer(data), this.config).then(function(data) {
+    ajaxReq.http.post(this.SERVERURL, data, this.config).then(function(data) {
         callback(data.data);
         parentObj.pendingPosts.splice(0, 1);
         if (parentObj.pendingPosts.length > 0) parentObj.queuePost();
@@ -119,13 +109,15 @@ etherscan.queuePost = function() {
         callback({ error: true, msg: "connection error", data: "" });
     });
 }
-etherscan.post = function(data, callback) {
+electrum.post = function(method, data, callback) {
+    var jsonrpc = require('jsonrpc-lite');
+    var requestObj = jsonrpc.request((new Date()).getTime(), method, data);
     this.pendingPosts.push({
-        data: data,
+        data: requestObj.serialize(),
         callback: function(_data) {
             callback(_data);
         }
     });
     if (this.pendingPosts.length == 1) this.queuePost();
 }
-module.exports = etherscan;
+module.exports = electrum;

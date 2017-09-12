@@ -4,11 +4,12 @@ uiFuncs.getTxData = function($scope) {
     return {
         to: $scope.tx.to,
         value: $scope.tx.value,
+        fee: $scope.tx.fee,
         unit: $scope.tx.unit,
         gasLimit: $scope.tx.gasLimit,
         data: $scope.tx.data,
         from: $scope.wallet.getAddressString(),
-        privKey: $scope.wallet.privKey ? $scope.wallet.getPrivateKeyString() : '',
+        privKey: $scope.wallet.privKey ? $scope.wallet.getPrivateKey() : {},
         path: $scope.wallet.getPath(),
         hwType: $scope.wallet.getHWType(),
         hwTransport: $scope.wallet.getHWTransport()
@@ -118,89 +119,57 @@ uiFuncs.trezorUnlockCallback = function(txData, callback) {
     });
 }
 uiFuncs.generateTx = function(txData, callback) {
-    if ((typeof txData.hwType != "undefined") && (txData.hwType == "trezor") && !txData.trezorUnlocked) {
-        uiFuncs.trezorUnlockCallback(txData, callback);
-        return;
-    }
     try {
         uiFuncs.isTxDataValid(txData);
-        var genTxWithInfo = function(data) {
-            var rawTx = {
-                nonce: ethFuncs.sanitizeHex(data.nonce),
-                gasPrice: data.isOffline ? ethFuncs.sanitizeHex(data.gasprice) : ethFuncs.sanitizeHex(ethFuncs.addTinyMoreToGas(data.gasprice)),
-                gasLimit: ethFuncs.sanitizeHex(ethFuncs.decimalToHex(txData.gasLimit)),
-                to: ethFuncs.sanitizeHex(txData.to),
-                value: ethFuncs.sanitizeHex(ethFuncs.decimalToHex(etherUnits.toWei(txData.value, txData.unit))),
-                data: ethFuncs.sanitizeHex(txData.data)
+        var selectTxs = function(unspentTransactions) {
+            var value = new BigNumber(txData.value).plus(txData.fee).times(1e8);
+            var find = [];
+            var findTotal = new BigNumber(0);
+            for(var i = 0; i < unspentTransactions.length; i++) {
+                var tx = unspentTransactions[i];
+                findTotal = findTotal.plus(tx.value);
+                find[find.length] = tx;
+                if(findTotal.greaterThanOrEqualTo(value)) break;
             }
-            if (ajaxReq.eip155) rawTx.chainId = ajaxReq.chainId;
-            var eTx = new ethUtil.Tx(rawTx);
-            if ((typeof txData.hwType != "undefined") && (txData.hwType == "ledger")) {
-                var app = new ledgerEth(txData.hwTransport);
-                var EIP155Supported = false;
-                var localCallback = function(result, error) {
-                    if (typeof error != "undefined") {
-                        if (callback !== undefined) callback({
-                            isError: true,
-                            error: error
-                        });
-                        return;
-                    }
-                    var splitVersion = result['version'].split('.');
-                    if (parseInt(splitVersion[0]) > 1) {
-                        EIP155Supported = true;
-                    } else
-                    if (parseInt(splitVersion[1]) > 0) {
-                        EIP155Supported = true;
-                    } else
-                    if (parseInt(splitVersion[2]) > 2) {
-                        EIP155Supported = true;
-                    }
-                    uiFuncs.signTxLedger(app, eTx, rawTx, txData, !EIP155Supported, callback);
-                }
-                app.getAppConfiguration(localCallback);
-            } else if ((typeof txData.hwType != "undefined") && (txData.hwType == "trezor")) {
-                uiFuncs.signTxTrezor(rawTx, txData, callback);
-            } else if ((typeof txData.hwType != "undefined") && (txData.hwType == "web3")) {
-              // for web3, we dont actually sign it here
-              // instead we put the final params in the "signedTx" field and
-              // wait for the confirmation dialogue / sendTx method
-              var txParams = Object.assign({ from: txData.from }, rawTx)
-              rawTx.rawTx = JSON.stringify(rawTx);
-              rawTx.signedTx = JSON.stringify(txParams);
-              rawTx.isError = false;
-              callback(rawTx)
-            } else if ((typeof txData.hwType != "undefined") && (txData.hwType == "digitalBitbox")) {
-                uiFuncs.signTxDigitalBitbox(eTx, rawTx, txData, callback);
+            if(value.greaterThanOrEqualTo(findTotal)) {
+                throw new Error('You do not have enough qtum for send');
+            }
+            return find;
+        };
+        ajaxReq.getUnspentTransactions(txData.from, function(data) {
+            if (data.error && callback !== undefined) {
+                callback({
+                    isError: true,
+                    error: e
+                });
             } else {
-                eTx.sign(new Buffer(txData.privKey, 'hex'));
-                rawTx.rawTx = JSON.stringify(rawTx);
-                rawTx.signedTx = '0x' + eTx.serialize().toString('hex');
-                rawTx.isError = false;
-                if (callback !== undefined) callback(rawTx);
-            }
-        }
-        if (txData.nonce || txData.gasPrice) {
-            var data = {
-                nonce: txData.nonce,
-                gasprice: txData.gasPrice
-            }
-            data.isOffline = txData.isOffline ? txData.isOffline : false;
-            genTxWithInfo(data);
-        } else {
-            ajaxReq.getTransactionData(txData.from, function(data) {
-                if (data.error && callback !== undefined) {
-                    callback({
-                        isError: true,
-                        error: e
-                    });
-                } else {
-                    data = data.data;
-                    data.isOffline = txData.isOffline ? txData.isOffline : false;
-                    genTxWithInfo(data);
+                data = data.data;
+                var inputs = selectTxs(data);
+                var tx = new bitcoinUtil.TransactionBuilder();
+                var totalValue = new BigNumber(0);
+                var value = new BigNumber(txData.value).times(1e8);
+                var fee = new BigNumber(txData.fee).times(1e8);
+                for(var i = 0; i < inputs.length; i++) {
+                    tx.addInput(inputs[i].tx_hash, inputs[i].tx_pos);
+                    totalValue = totalValue.plus(inputs[i].value);
                 }
-            });
-        }
+                tx.addOutput(txData.to, new BigNumber(value).toNumber());
+                if(totalValue.minus(value).minus(fee).toNumber() > 0) {
+                    tx.addOutput(txData.from, totalValue.minus(value).minus(fee).toNumber());
+                }
+                for(var i = 0; i < inputs.length; i++) {
+                    window.tx = tx;
+                    window.tx1 = txData.privKey;
+                    tx.sign(i, txData.privKey);
+                }
+                window.tx = tx.build();
+                if (callback !== undefined) callback({
+                    isError: false,
+                    rawTx: tx.build().toBuffer().toString(),
+                    signedTx: tx.build().toHex()
+                });
+            }
+        });
     } catch (e) {
         if (callback !== undefined) callback({
             isError: true,
@@ -209,21 +178,6 @@ uiFuncs.generateTx = function(txData, callback) {
     }
 }
 uiFuncs.sendTx = function(signedTx, callback) {
-  // check for web3 late signed tx
-    if (signedTx.slice(0,2) !== '0x') {
-      var txParams = JSON.parse(signedTx)
-      window.web3.eth.sendTransaction(txParams, function(err, txHash){
-        if (err) {
-          return callback({
-            isError: true,
-            error: err.stack,
-          })
-        }
-        callback({ data: txHash })
-      });
-      return
-    }
-
     ajaxReq.sendRawTx(signedTx, function(data) {
         var resp = {};
         if (data.error) {
@@ -240,17 +194,15 @@ uiFuncs.sendTx = function(signedTx, callback) {
         if (callback !== undefined) callback(resp);
     });
 }
-uiFuncs.transferAllBalance = function(fromAdd, gasLimit, callback) {
+uiFuncs.transferAllBalance = function(fromAdd, fee, callback) {
     try {
-        ajaxReq.getTransactionData(fromAdd, function(data) {
+        ajaxReq.getBalance(fromAdd, function(data) {
             if (data.error) throw data.msg;
             data = data.data;
-            var gasPrice = new BigNumber(ethFuncs.sanitizeHex(ethFuncs.addTinyMoreToGas(data.gasprice))).times(gasLimit);
-            var maxVal = new BigNumber(data.balance).minus(gasPrice);
-            maxVal = etherUnits.toEther(maxVal, 'wei') < 0 ? 0 : etherUnits.toEther(maxVal, 'wei');
+            var maxVal = new BigNumber(data.balance).minus(fee);
             if (callback !== undefined) callback({
                 isError: false,
-                unit: "ether",
+                unit: "qtum",
                 value: maxVal
             });
         });

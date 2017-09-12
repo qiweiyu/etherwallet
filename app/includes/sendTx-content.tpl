@@ -4,7 +4,7 @@
 
     <!-- To Address -->
     <div class="row form-group">
-      <address-field placeholder="0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8" var-name="tx.to"></address-field>
+      <address-field placeholder="QTTLepzp1ftVvmfP7QpQpr8DwYPWktcEXV" var-name="tx.to"></address-field>
     </div>
 
     <!-- Amount to Send -->
@@ -21,7 +21,7 @@
           <strong>{{unitReadable}}<i class="caret"></i></strong>
         </a>
         <ul class="dropdown-menu dropdown-menu-right" ng-show="dropdownAmount && !tx.readOnly">
-          <li><a ng-class="{true:'active'}[tx.sendMode=='ether']" ng-click="setSendMode('ether')">{{ajaxReq.type}}</a></li>
+          <li><a ng-class="{true:'active'}[tx.sendMode=='qtum']" ng-click="setSendMode('qtum')">{{ajaxReq.type}}</a></li>
           <li ng-repeat="token in wallet.tokenObjs track by $index" ng-show="token.balance!=0 && token.balance!='loading' || token.type!=='default' || tokenVisibility=='shown'">
             <a ng-class="{true:'active'}[unitReadable == token.getSymbol()]" ng-click="setSendMode('token', $index, token.getSymbol())"> {{token.getSymbol()}} </a>
           </li>
@@ -39,27 +39,29 @@
           <img src="images/icon-help.svg" class="help-icon" />
           <p class="account-help-text" translate="GAS_LIMIT_Desc"></p>
         </a>
-        <label translate="TRANS_gas"> Gas Limit: </label>
+        <label translate="TRANS_fee"> Fee: </label>
         <input type="text"
                class="form-control"
-               placeholder="21000"
-               ng-model="tx.gasLimit"
-               ng-change="gasLimitChanged=true"
+               placeholder="0.1"
+               ng-model="tx.fee"
+               ng-change="feeChanged=true"
                ng-disabled="tx.readOnly || checkTxReadOnly"
-               ng-class="Validator.isPositiveNumber(tx.gasLimit) ? 'is-valid' : 'is-invalid'" />
+               ng-class="Validator.isPositiveNumber(tx.fee) ? 'is-valid' : 'is-invalid'" />
       </div>
     </div>
     <!-- / Gas Limit -->
 
     <!-- Advanced Option Panel -->
+      <!-- todo
     <a ng-click="showAdvance=true" ng-show='globalService.currentTab==globalService.tabs.sendTransaction.id'>
       <p class="strong" translate="TRANS_advanced"> + Advanced: Add Data </p>
     </a>
+    -->
 
     <section ng-show="showAdvance || checkTxPage">
       <!-- Data -->
       <div class="row form-group">
-        <div class="col-sm-11 clearfix" ng-show="tx.sendMode=='ether'">
+        <div class="col-sm-11 clearfix" ng-show="tx.sendMode=='qtum'">
           <span class="account-help-icon">
             <img src="images/icon-help.svg" class="help-icon" />
             <p class="account-help-text" translate="OFFLINE_Step2_Label_6b">This is optional.</p>
@@ -130,11 +132,13 @@
     </div>
 
     <div class="row form-group" ng-show="showRaw">
+        <!-- todo
       <div class="col-sm-6">
         <label translate="SEND_raw"> Raw Transaction </label>
         <textarea class="form-control" rows="4" readonly >{{rawTx}}</textarea>
       </div>
-      <div class="col-sm-6">
+      -->
+      <div class="col-sm-12">
         <label translate="SEND_signed"> Signed Transaction </label>
         <textarea class="form-control" rows="4" readonly >{{signedTx}}</textarea>
       </div>
