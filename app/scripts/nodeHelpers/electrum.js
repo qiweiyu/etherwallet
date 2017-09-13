@@ -1,6 +1,6 @@
 'use strict';
 var electrum = function() {}
-electrum.SERVERURL = "http://127.0.0.1:50001/";
+electrum.SERVERURL = "http://47.88.61.227:52003/";
 electrum.pendingPosts = [];
 electrum.config = {
     headers: {
